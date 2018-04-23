@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crd-controller
+  namespace: default
+  labels:
+    controller: foo
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        controller: foo
+  template:
+    metadata:
+      labels:
+        controller: foo
+    spec:
+      containers:
+        - name: crd-controller
+          image: localhost:5000/crd-controller:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crd-controller
+  namespace: default
+  labels:
+    controller: foo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    controller: foo
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: crd-controller
+  namespace: default
+  labels:
+    controller: foo
+spec:
+  rules:
+    - host: crd-controller.niclasgeiger.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: crd-controller
+              servicePort: http
