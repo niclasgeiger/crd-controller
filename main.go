@@ -30,7 +30,7 @@ func main() {
 		glog.Fatalf("Error building example clientset: %v", err)
 	}
 
-	list, err := client.ExampleV1().Foos("default").List(metav1.ListOptions{})
+	list, err := client.NiclasgeigerV1().Foos("default").List(metav1.ListOptions{})
 	if err != nil {
 		glog.Fatalf("Error listing all Foos: %v", err)
 	}

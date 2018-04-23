@@ -25,22 +25,22 @@ import (
 	rest "k8s.io/client-go/rest"
 )
 
-type ExampleV1Interface interface {
+type NiclasgeigerV1Interface interface {
 	RESTClient() rest.Interface
 	FoosGetter
 }
 
-// ExampleV1Client is used to interact with features provided by the example.com group.
-type ExampleV1Client struct {
+// NiclasgeigerV1Client is used to interact with features provided by the niclasgeiger.com group.
+type NiclasgeigerV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ExampleV1Client) Foos(namespace string) FooInterface {
+func (c *NiclasgeigerV1Client) Foos(namespace string) FooInterface {
 	return newFoos(c, namespace)
 }
 
-// NewForConfig creates a new ExampleV1Client for the given config.
-func NewForConfig(c *rest.Config) (*ExampleV1Client, error) {
+// NewForConfig creates a new NiclasgeigerV1Client for the given config.
+func NewForConfig(c *rest.Config) (*NiclasgeigerV1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -49,12 +49,12 @@ func NewForConfig(c *rest.Config) (*ExampleV1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ExampleV1Client{client}, nil
+	return &NiclasgeigerV1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new ExampleV1Client for the given config and
+// NewForConfigOrDie creates a new NiclasgeigerV1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *ExampleV1Client {
+func NewForConfigOrDie(c *rest.Config) *NiclasgeigerV1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -62,9 +62,9 @@ func NewForConfigOrDie(c *rest.Config) *ExampleV1Client {
 	return client
 }
 
-// New creates a new ExampleV1Client for the given RESTClient.
-func New(c rest.Interface) *ExampleV1Client {
-	return &ExampleV1Client{c}
+// New creates a new NiclasgeigerV1Client for the given RESTClient.
+func New(c rest.Interface) *NiclasgeigerV1Client {
+	return &NiclasgeigerV1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -82,7 +82,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *ExampleV1Client) RESTClient() rest.Interface {
+func (c *NiclasgeigerV1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

@@ -30,13 +30,13 @@ import (
 
 // FakeFoos implements FooInterface
 type FakeFoos struct {
-	Fake *FakeExampleV1
+	Fake *FakeNiclasgeigerV1
 	ns   string
 }
 
-var foosResource = schema.GroupVersionResource{Group: "example.com", Version: "v1", Resource: "foos"}
+var foosResource = schema.GroupVersionResource{Group: "niclasgeiger.com", Version: "v1", Resource: "foos"}
 
-var foosKind = schema.GroupVersionKind{Group: "example.com", Version: "v1", Kind: "Foo"}
+var foosKind = schema.GroupVersionKind{Group: "niclasgeiger.com", Version: "v1", Kind: "Foo"}
 
 // Get takes name of the foo, and returns the corresponding foo object, and an error if there is any.
 func (c *FakeFoos) Get(name string, options v1.GetOptions) (result *niclasgeiger_com_v1.Foo, err error) {

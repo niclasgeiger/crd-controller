@@ -61,13 +61,13 @@ func NewFilteredFooInformer(client versioned.Interface, namespace string, resync
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ExampleV1().Foos(namespace).List(options)
+				return client.NiclasgeigerV1().Foos(namespace).List(options)
 			},
 			WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ExampleV1().Foos(namespace).Watch(options)
+				return client.NiclasgeigerV1().Foos(namespace).Watch(options)
 			},
 		},
 		&niclasgeiger_com_v1.Foo{},

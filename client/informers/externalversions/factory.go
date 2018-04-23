@@ -172,9 +172,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Example() niclasgeiger_com.Interface
+	Niclasgeiger() niclasgeiger_com.Interface
 }
 
-func (f *sharedInformerFactory) Example() niclasgeiger_com.Interface {
+func (f *sharedInformerFactory) Niclasgeiger() niclasgeiger_com.Interface {
 	return niclasgeiger_com.New(f, f.namespace, f.tweakListOptions)
 }
