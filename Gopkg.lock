@@ -120,6 +120,16 @@
   revision = "f51c12702a4d776e4c1fa9b0fabab841babae631"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/ast/astutil",
+    "imports",
+    "internal/fastwalk"
+  ]
+  revision = "94b14834a20132093826ea5e2da5502a13908ad3"
+
+[[projects]]
   name = "gopkg.in/inf.v0"
   packages = ["."]
   revision = "3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4"
@@ -240,7 +250,7 @@
   version = "v7.0.0"
 
 [[projects]]
-  branch = "release-1.10"
+  branch = "master"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -253,9 +263,10 @@
     "cmd/client-gen/types",
     "pkg/util"
   ]
-  revision = "cbd9dba38c3d8e0035d4bb554bd321e2c190e629"
+  revision = "c7a364cb8cf12ce4704f017c0a403c55db3e752b"
 
 [[projects]]
+  branch = "master"
   name = "k8s.io/gengo"
   packages = [
     "args",
@@ -264,11 +275,11 @@
     "parser",
     "types"
   ]
-  revision = "9e661e9308f078838e266cca1c673922088c0ea4"
+  revision = "01a732e01d00cb9a81bb0ca050d3e6d2b947927b"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bb7bcb4995c97a677393136994f05daef25616a2604f0c7b5182088c0c5daaa3"
+  inputs-digest = "0c70b0b31727f4a70a78f1e20da9e692829b223e2414c1e2b701f009ff63e717"
   solver-name = "gps-cdcl"
   solver-version = 1

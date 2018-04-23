@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.com/niclasgeiger/crd-controller/client/clientset/versioned"
-	niclasgeigerv1 "github.com/niclasgeiger/crd-controller/client/clientset/versioned/typed/niclasgeiger.com/v1"
-	fakeniclasgeigerv1 "github.com/niclasgeiger/crd-controller/client/clientset/versioned/typed/niclasgeiger.com/v1/fake"
+	examplev1 "github.com/niclasgeiger/crd-controller/client/clientset/versioned/typed/niclasgeiger.com/v1"
+	fakeexamplev1 "github.com/niclasgeiger/crd-controller/client/clientset/versioned/typed/niclasgeiger.com/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -41,9 +41,10 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 		}
 	}
 
-	fakePtr := testing.Fake{}
-	fakePtr.AddReactor("*", "*", testing.ObjectReaction(o))
-	fakePtr.AddWatchReactor("*", func(action testing.Action) (handled bool, ret watch.Interface, err error) {
+	cs := &Clientset{}
+	cs.discovery = &fakediscovery.FakeDiscovery{Fake: &cs.Fake}
+	cs.AddReactor("*", "*", testing.ObjectReaction(o))
+	cs.AddWatchReactor("*", func(action testing.Action) (handled bool, ret watch.Interface, err error) {
 		gvr := action.GetResource()
 		ns := action.GetNamespace()
 		watch, err := o.Watch(gvr, ns)
@@ -53,7 +54,7 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 		return true, watch, nil
 	})
 
-	return &Clientset{fakePtr, &fakediscovery.FakeDiscovery{Fake: &fakePtr}}
+	return cs
 }
 
 // Clientset implements clientset.Interface. Meant to be embedded into a
@@ -70,12 +71,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// NiclasgeigerV1 retrieves the NiclasgeigerV1Client
-func (c *Clientset) NiclasgeigerV1() niclasgeigerv1.NiclasgeigerV1Interface {
-	return &fakeniclasgeigerv1.FakeNiclasgeigerV1{Fake: &c.Fake}
+// ExampleV1 retrieves the ExampleV1Client
+func (c *Clientset) ExampleV1() examplev1.ExampleV1Interface {
+	return &fakeexamplev1.FakeExampleV1{Fake: &c.Fake}
 }
 
-// Niclasgeiger retrieves the NiclasgeigerV1Client
-func (c *Clientset) Niclasgeiger() niclasgeigerv1.NiclasgeigerV1Interface {
-	return &fakeniclasgeigerv1.FakeNiclasgeigerV1{Fake: &c.Fake}
+// Example retrieves the ExampleV1Client
+func (c *Clientset) Example() examplev1.ExampleV1Interface {
+	return &fakeexamplev1.FakeExampleV1{Fake: &c.Fake}
 }

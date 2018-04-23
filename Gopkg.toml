@@ -37,3 +37,7 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
 [[constraint]]
   name = "k8s.io/code-generator"
   branch = "master"
+
+[[override]]
+  name = "k8s.io/gengo"
+  branch = "master"
