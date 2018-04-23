@@ -5,7 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	niclasgeigercom "github.com/niclasgeiger/crd-controller/apis/niclasgeiger.com"
+	niclasgeigercom "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com"
 )
 
 // SchemeGroupVersion is group version used to register these objects
