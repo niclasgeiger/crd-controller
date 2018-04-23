@@ -1,0 +1,6 @@
+apiVersion: niclasgeiger.com
+kind: Foo
+metaname:
+  name: test
+spec:
+  Bar: "Hello World"
