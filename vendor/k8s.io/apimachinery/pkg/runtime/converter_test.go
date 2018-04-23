@@ -18,7 +18,7 @@ limitations under the License.
 // Unstructured type depends on unstructured converter package but we want to test how the converter handles
 // the Unstructured type so we need to import both.
 
-package runtime_test
+package runtime
 
 import (
 	encodingjson "encoding/json"

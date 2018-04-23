@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	niclasgeigerclient "github.com/niclasgeiger/crd-controller/client/clientset/versioned"
+	niclasgeigerclient "github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
