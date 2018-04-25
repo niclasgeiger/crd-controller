@@ -16,7 +16,8 @@ type Foo struct {
 }
 
 type FooSpec struct {
-	Bar string `json:"bar"`
+	Port     int32 `json:"port"`
+	NodePort int32 `json:"nodePort"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
