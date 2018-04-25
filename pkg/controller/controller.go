@@ -7,6 +7,7 @@ import (
 
 	informers "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions"
 	lister "github.com/niclasgeiger/crd-controller/pkg/client/listers/niclasgeiger.com/v1"
+	"github.com/pivotal-cf/cf-redis-broker/Godeps/_workspace/src/github.com/pborman/uuid"
 	"github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -27,7 +28,21 @@ type Controller struct {
 	k8sClient   *kubernetes.Clientset
 }
 
-func (c Controller) EnqueueItem(obj interface{}) {
+type Action string
+
+const (
+	DeleteAction Action = "delete"
+	AddAction    Action = "add"
+)
+
+type Job struct {
+	ID        string
+	Action    Action
+	Namespace string
+	Name      string
+}
+
+func (c Controller) EnqueueItem(action Action, obj interface{}) {
 	logrus.Info("Added new Foo Object")
 	var key string
 	var err error
@@ -35,8 +50,15 @@ func (c Controller) EnqueueItem(obj interface{}) {
 		runtime.HandleError(err)
 		return
 	}
-	logrus.Info("Adding key to workqueue")
-	c.workqueue.AddRateLimited(key)
+	namespace, name, err := cache.SplitMetaNamespaceKey(key)
+	job := Job{
+		ID:        uuid.New(),
+		Action:    action,
+		Namespace: namespace,
+		Name:      name,
+	}
+	logrus.Info("Adding job to workqueue")
+	c.workqueue.AddRateLimited(job)
 }
 
 func NewController(kubeClient *kubernetes.Clientset, factory informers.SharedInformerFactory) *Controller {
@@ -50,9 +72,11 @@ func NewController(kubeClient *kubernetes.Clientset, factory informers.SharedInf
 
 	// add event listener for CRD
 	factory.Niclasgeiger().V1().Foos().Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.EnqueueItem,
+		AddFunc: func(obj interface{}) {
+			controller.EnqueueItem(AddAction, obj)
+		},
 		DeleteFunc: func(obj interface{}) {
-
+			controller.EnqueueItem(DeleteAction, obj)
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 
@@ -117,14 +141,14 @@ func (c *Controller) processNextWorkItem() bool {
 		// put back on the workqueue and attempted again after a back-off
 		// period.
 		defer c.workqueue.Done(obj)
-		var key string
+		var job Job
 		var ok bool
 		// We expect strings to come off the workqueue. These are of the
 		// form namespace/name. We do this as the delayed nature of the
 		// workqueue means the items in the informer cache may actually be
 		// more up to date that when the item was initially put onto the
 		// workqueue.
-		if key, ok = obj.(string); !ok {
+		if job, ok = obj.(Job); !ok {
 			// As the item in the workqueue is actually invalid, we call
 			// Forget here else we'd go into a loop of attempting to
 			// process a work item that is invalid.
@@ -134,13 +158,13 @@ func (c *Controller) processNextWorkItem() bool {
 		}
 		// Run the syncHandler, passing it the namespace/name string of the
 		// Foo resource to be synced.
-		if err := c.syncHandler(key); err != nil {
-			return fmt.Errorf("error syncing '%s': %s", key, err.Error())
+		if err := c.syncHandler(job); err != nil {
+			return fmt.Errorf("error syncing '%s': %s", job, err.Error())
 		}
 		// Finally, if no error occurs we Forget this item so it does not
 		// get queued again until another change happens.
 		c.workqueue.Forget(obj)
-		logrus.Infof("Successfully synced '%s'", key)
+		logrus.Infof("Successfully synced '%s'", job)
 		return nil
 	}(obj)
 
@@ -152,34 +176,44 @@ func (c *Controller) processNextWorkItem() bool {
 	return true
 }
 
-// syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the Foo resource
-// with the current status of the resource.
-func (c *Controller) syncHandler(key string) error {
+func (c *Controller) syncHandler(job Job) error {
 	// Convert the namespace/name string into a distinct namespace and name
-	namespace, name, err := cache.SplitMetaNamespaceKey(key)
-	if err != nil {
-		runtime.HandleError(fmt.Errorf("invalid resource key: %s", key))
-		return nil
-	}
 	logrus.WithFields(logrus.Fields{
-		"namespace": namespace,
-		"name":      name,
+		"namespace": job.Namespace,
+		"name":      job.Name,
 	}).Info("syncing Handlers")
+	switch job.Action {
+	case AddAction:
+		return c.addFoo(job)
+	case DeleteAction:
+		return c.deleteFoo(job)
+	}
+
+	return fmt.Errorf("unsupported Job Action")
+}
+
+func (c *Controller) deleteFoo(job Job) error {
+	if err := c.k8sClient.CoreV1().Services("default").Delete(job.Name, &metav1.DeleteOptions{}); err != nil {
+		logrus.Warn("Could not delete Service")
+		return err
+	}
+	return nil
+}
+
+func (c *Controller) addFoo(job Job) error {
 
 	// Get the Foo resource with this namespace/name
-	foo, err := c.fooLister.Foos(namespace).Get(name)
+	foo, err := c.fooLister.Foos(job.Namespace).Get(job.Name)
 	if err != nil {
 		// The Foo resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
-			runtime.HandleError(fmt.Errorf("foo '%s' in work queue no longer exists", key))
+			runtime.HandleError(fmt.Errorf("foo '%s' in work queue no longer exists", job.ID))
 			return nil
 		}
 
 		return err
 	}
-
 	srv := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      foo.Name,
@@ -201,10 +235,9 @@ func (c *Controller) syncHandler(key string) error {
 			},
 		},
 	}
-	if _, err = c.k8sClient.CoreV1().Services("default").Create(srv); err != nil {
+	if _, err := c.k8sClient.CoreV1().Services("default").Create(srv); err != nil {
 		logrus.Warn("Could not create Service")
 		return err
 	}
-
 	return nil
 }
