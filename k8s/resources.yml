@@ -4,16 +4,16 @@ metadata:
   name: crd-controller
   namespace: default
   labels:
-    controller: foo
+    app: foo
 spec:
   replicas: 1
   selector:
       matchLabels:
-        controller: foo
+        app: foo
   template:
     metadata:
       labels:
-        controller: foo
+        app: foo
     spec:
       containers:
         - name: crd-controller
@@ -30,30 +30,44 @@ metadata:
   name: crd-controller
   namespace: default
   labels:
-    controller: foo
+    app: foo
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
     - port: 80
       targetPort: http
       protocol: TCP
       name: http
   selector:
-    controller: foo
+    app: foo
 ---
-apiVersion: extensions/v1beta1
-kind: Ingress
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
+  name:  system:default:crd-controller-roles
+rules:
+- apiGroups: ["", "niclasgeiger.com"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: foo
   name: crd-controller
   namespace: default
-  labels:
-    controller: foo
-spec:
-  rules:
-    - host: crd-controller.niclasgeiger.com
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: crd-controller
-              servicePort: http
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: crd-controller-roles
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: system:default:crd-controller-roles
+  apiGroup: "rbac.authorization.k8s.io"

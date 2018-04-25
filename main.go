@@ -2,52 +2,67 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"time"
 
-	"net/http"
+	"path/filepath"
 
-	"github.com/golang/glog"
-	niclasgeigerclient "github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clientset "github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned"
+	informers "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions"
+	"github.com/niclasgeiger/crd-controller/pkg/controller"
+	"github.com/nikhita/custom-database-controller/pkg/signals"
+	"github.com/sirupsen/logrus"
+	kubeinformers "k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-)
-
-const (
-	port = ":80"
+	"k8s.io/client-go/util/homedir"
 )
 
 var (
-	kuberconfig = flag.String("kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-	master      = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	kubeconfig string
+	masterURL  string
 )
-var client *niclasgeigerclient.Clientset
 
 func main() {
+	logrus.Info("Starting Listening")
 	flag.Parse()
 
-	cfg, err := clientcmd.BuildConfigFromFlags(*master, *kuberconfig)
+	// set up signals so we handle the first shutdown signal gracefully
+	stopCh := signals.SetupSignalHandler()
+
+	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	if err != nil {
-		glog.Fatalf("Error building kubeconfig: %v", err)
+		logrus.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	client, err = niclasgeigerclient.NewForConfig(cfg)
+	kubeClient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		glog.Fatalf("Error building example clientset: %v", err)
+		logrus.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
-	http.HandleFunc("/", Handle)
-	http.ListenAndServe(port, nil)
+
+	exampleClient, err := clientset.NewForConfig(cfg)
+	if err != nil {
+		logrus.Fatalf("Error building example clientset: %s", err.Error())
+	}
+
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
+	crdInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
+
+	controller := controller.NewController(crdInformerFactory)
+
+	go kubeInformerFactory.Start(stopCh)
+	go crdInformerFactory.Start(stopCh)
+
+	if err = controller.Run(2, stopCh); err != nil {
+		logrus.Fatalf("Error running controller: %s", err.Error())
+	}
 }
 
-func Handle(writer http.ResponseWriter, request *http.Request) {
-	list, err := client.NiclasgeigerV1().Foos("default").List(metav1.ListOptions{})
-	if err != nil {
-		glog.Fatalf("Error listing all Foos: %v", err)
-	}
+func init() {
 
-	foos := make([]string, 0)
-	for _, db := range list.Items {
-		foos = append(foos, fmt.Sprintf("Foo %s with Bar %q\n", db.Name, db.Spec.Bar))
+	if home := homedir.HomeDir(); home != "" {
+		flag.StringVar(&kubeconfig, "kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		flag.StringVar(&kubeconfig, "kubeconfig", "", "absolute path to the kubeconfig file")
 	}
-	output := fmt.Sprintf("%s", foos)
-	writer.Write([]byte(output))
+	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }

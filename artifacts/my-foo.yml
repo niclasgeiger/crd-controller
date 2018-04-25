@@ -1,6 +1,6 @@
-apiVersion: niclasgeiger.com
+apiVersion: "niclasgeiger.com/v1"
 kind: Foo
-metaname:
-  name: test
+metadata:
+  name: test-2
 spec:
   Bar: "Hello World"
