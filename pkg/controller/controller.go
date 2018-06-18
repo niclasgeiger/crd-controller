@@ -7,14 +7,10 @@ import (
 
 	niclasgeigerv1 "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com/v1"
 	informers "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions"
-	lister "github.com/niclasgeiger/crd-controller/pkg/client/listers/niclasgeiger.com/v1"
 	"github.com/pborman/uuid"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/api/core/v1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -24,10 +20,8 @@ import (
 )
 
 type Controller struct {
-	podsSynched cache.InformerSynced
-	workqueue   workqueue.RateLimitingInterface
-	userLister  lister.UserLister
-	k8sClient   *kubernetes.Clientset
+	workqueue workqueue.RateLimitingInterface
+	informer  cache.SharedIndexInformer
 }
 
 type Action string
@@ -78,11 +72,9 @@ func NewController(restConfig *rest.Config, factory informers.SharedInformerFact
 	userInformer := factory.Niclasgeiger().V1().Users()
 
 	controller := &Controller{
-		workqueue:  workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Users"),
-		userLister: userInformer.Lister(),
-		k8sClient:  kubeClient,
+		workqueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Users"),
+		informer:  userInformer.Informer(),
 	}
-
 	// add event listener for CRD
 	userInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -91,9 +83,7 @@ func NewController(restConfig *rest.Config, factory informers.SharedInformerFact
 		DeleteFunc: func(obj interface{}) {
 			controller.EnqueueItem(DeleteAction, obj)
 		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-
-		},
+		UpdateFunc: func(oldObj, newObj interface{}) {},
 	})
 
 	return controller
@@ -107,23 +97,19 @@ func (c *Controller) Run(stopCh <-chan struct{}) error {
 	defer runtime.HandleCrash()
 	defer c.workqueue.ShutDown()
 
-	// Start the informer factories to begin populating the informer caches
-	logrus.Info("Starting Foo controller")
+	go c.informer.Run(stopCh)
 
-	// Wait for the caches to be synced before starting workers
-	logrus.Info("Waiting for informer caches to sync")
-	/*
-		if ok := cache.WaitForCacheSync(stopCh, c.deploymentsSynced, c.foosSynced); !ok {
-			return errors.New("failed to wait for caches to sync")
-		}
-	*/
+	// Wait for all involved caches to be synced, before processing items from the queue is started
+	if !cache.WaitForCacheSync(stopCh, c.informer.HasSynced) {
+		err := fmt.Errorf("Timed out waiting for caches to sync")
+		runtime.HandleError(err)
+		return err
+	}
 
-	logrus.Info("Starting worker")
 	go wait.Until(c.runWorker, time.Second, stopCh)
 
-	logrus.Info("Started workers")
+	// stop Channel to gracefully shut down
 	<-stopCh
-	logrus.Info("Shutting down workers")
 
 	return nil
 }
@@ -142,40 +128,24 @@ func (c *Controller) processNextWorkItem() bool {
 	obj, shutdown := c.workqueue.Get()
 
 	if shutdown {
-		logrus.Info("shutting down worker")
 		return false
 	}
-	// We wrap this block in a func so we can defer c.workqueue.Done.
 	err := func(obj interface{}) error {
-		// We call Done here so the workqueue knows we have finished
-		// processing this item. We also must remember to call Forget if we
-		// do not want this work item being re-queued. For example, we do
-		// not call Forget if a transient error occurs, instead the item is
-		// put back on the workqueue and attempted again after a back-off
-		// period.
+		// processing of the item is done after exiting the function
 		defer c.workqueue.Done(obj)
 		var job Job
 		var ok bool
-		// We expect strings to come off the workqueue. These are of the
-		// form namespace/name. We do this as the delayed nature of the
-		// workqueue means the items in the informer cache may actually be
-		// more up to date that when the item was initially put onto the
-		// workqueue.
 		if job, ok = obj.(Job); !ok {
-			// As the item in the workqueue is actually invalid, we call
-			// Forget here else we'd go into a loop of attempting to
-			// process a work item that is invalid.
+			// Item can't be processed by this queue
 			c.workqueue.Forget(obj)
 			runtime.HandleError(fmt.Errorf("expected string in workqueue but got %#v", obj))
 			return nil
 		}
-		// Run the syncHandler, passing it the namespace/name string of the
-		// Foo resource to be synced.
+		// Run the syncHandler, passing it the namespace/name string of the Job
 		if err := c.syncHandler(job); err != nil {
 			return fmt.Errorf("error syncing '%s': %s", job, err.Error())
 		}
-		// Finally, if no error occurs we Forget this item so it does not
-		// get queued again until another change happens.
+		// Item can be forgotten as it was successfully processed
 		c.workqueue.Forget(obj)
 		logrus.Infof("Successfully synced '%s'", job)
 		return nil
@@ -197,60 +167,10 @@ func (c *Controller) syncHandler(job Job) error {
 	}).Info("syncing Handlers")
 	switch job.Action {
 	case AddAction:
-		return c.addFoo(job)
+		fmt.Println("add action executed")
 	case DeleteAction:
-		return c.deleteFoo(job)
+		fmt.Println("delete action executed")
 	}
 
 	return fmt.Errorf("unsupported Job Action")
-}
-
-func (c *Controller) deleteFoo(job Job) error {
-	if err := c.k8sClient.CoreV1().Services("default").Delete(job.Name, &metav1.DeleteOptions{}); err != nil {
-		logrus.Warn("Could not delete Service")
-		return err
-	}
-	return nil
-}
-
-func (c *Controller) addFoo(job Job) error {
-
-	// Get the Foo resource with this namespace/name
-	foo, err := c.userLister.Get(job.Name)
-	if err != nil {
-		// The Foo resource may no longer exist, in which case we stop
-		// processing.
-		if errors.IsNotFound(err) {
-			runtime.HandleError(fmt.Errorf("foo '%s' in work queue no longer exists", job.ID))
-			return nil
-		}
-
-		return err
-	}
-	srv := &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      foo.Name,
-			Namespace: foo.Namespace,
-		},
-		Spec: v1.ServiceSpec{
-			Type: v1.ServiceTypeNodePort,
-
-			Selector: map[string]string{
-				"app": "test",
-			},
-			Ports: []v1.ServicePort{
-				{
-					Name:     "tcp",
-					Protocol: v1.ProtocolTCP,
-					Port:     foo.Spec.Port,
-					NodePort: foo.Spec.NodePort,
-				},
-			},
-		},
-	}
-	if _, err := c.k8sClient.CoreV1().Services("default").Create(srv); err != nil {
-		logrus.Warn("Could not create Service")
-		return err
-	}
-	return nil
 }
