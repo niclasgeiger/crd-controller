@@ -1,7 +1,7 @@
 apiVersion: "niclasgeiger.com/v1"
 kind: Foo
 metadata:
-  name: test
+  name: test-1
 spec:
   port: 8080
-  nodePort: 32000
+  nodePort: 32001

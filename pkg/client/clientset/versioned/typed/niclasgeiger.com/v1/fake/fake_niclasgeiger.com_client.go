@@ -28,8 +28,8 @@ type FakeNiclasgeigerV1 struct {
 	*testing.Fake
 }
 
-func (c *FakeNiclasgeigerV1) Foos(namespace string) v1.FooInterface {
-	return &FakeFoos{c, namespace}
+func (c *FakeNiclasgeigerV1) Users() v1.UserInterface {
+	return &FakeUsers{c}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

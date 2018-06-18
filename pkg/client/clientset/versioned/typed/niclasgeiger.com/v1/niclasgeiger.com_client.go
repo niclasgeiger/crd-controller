@@ -27,7 +27,7 @@ import (
 
 type NiclasgeigerV1Interface interface {
 	RESTClient() rest.Interface
-	FoosGetter
+	UsersGetter
 }
 
 // NiclasgeigerV1Client is used to interact with features provided by the niclasgeiger.com group.
@@ -35,8 +35,8 @@ type NiclasgeigerV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *NiclasgeigerV1Client) Foos(namespace string) FooInterface {
-	return newFoos(c, namespace)
+func (c *NiclasgeigerV1Client) Users() UserInterface {
+	return newUsers(c)
 }
 
 // NewForConfig creates a new NiclasgeigerV1Client for the given config.

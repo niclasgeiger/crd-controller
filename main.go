@@ -47,13 +47,13 @@ func main() {
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
 	crdInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
 
-	controller := controller.NewController(kubeClient, crdInformerFactory)
+	crdController := controller.NewController(cfg, crdInformerFactory, kubeClient)
 
 	go kubeInformerFactory.Start(stopCh)
 	go crdInformerFactory.Start(stopCh)
 
-	if err = controller.Run(stopCh); err != nil {
-		logrus.Fatalf("Error running controller: %s", err.Error())
+	if err = crdController.Run(stopCh); err != nil {
+		logrus.Fatalf("Error running crdController: %s", err.Error())
 	}
 }
 

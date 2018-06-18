@@ -81,6 +81,12 @@
   revision = "1b7013d490277a6225448a6d06abfe7ddc80c303"
 
 [[projects]]
+  name = "github.com/pborman/uuid"
+  packages = ["."]
+  revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
+  version = "v1.1"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
@@ -199,6 +205,18 @@
   ]
   revision = "73d903622b7391f3312dcbac6483fed484e185f8"
   version = "kubernetes-1.10.0"
+
+[[projects]]
+  branch = "master"
+  name = "k8s.io/apiextensions-apiserver"
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/scheme",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+  ]
+  revision = "a83bd3db57723078a5d8a4044452d5199eb1a075"
 
 [[projects]]
   branch = "master"
@@ -403,6 +421,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e9582c19607adae90e2783d8ed54fa7adf82178f29afa64eef3e1e878373083c"
+  inputs-digest = "c9b427f8acab7b1be1e65aaa0b3cdd7a2ee09d7116f2843813b5e00abc05be7b"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -5,26 +5,28 @@ import (
 
 	"fmt"
 
+	niclasgeigerv1 "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com/v1"
 	informers "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions"
 	lister "github.com/niclasgeiger/crd-controller/pkg/client/listers/niclasgeiger.com/v1"
-	"github.com/pivotal-cf/cf-redis-broker/Godeps/_workspace/src/github.com/pborman/uuid"
+	"github.com/pborman/uuid"
 	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
+	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
-const controllerAgentName = "test-controller"
-
 type Controller struct {
 	podsSynched cache.InformerSynced
 	workqueue   workqueue.RateLimitingInterface
-	fooLister   lister.FooLister
+	userLister  lister.UserLister
 	k8sClient   *kubernetes.Clientset
 }
 
@@ -61,17 +63,28 @@ func (c Controller) EnqueueItem(action Action, obj interface{}) {
 	c.workqueue.AddRateLimited(job)
 }
 
-func NewController(kubeClient *kubernetes.Clientset, factory informers.SharedInformerFactory) *Controller {
-	fooInformer := factory.Niclasgeiger().V1().Foos()
+func NewController(restConfig *rest.Config, factory informers.SharedInformerFactory, kubeClient *kubernetes.Clientset) *Controller {
+
+	apiextcsClient, err := apiextcs.NewForConfig(restConfig)
+	if err != nil {
+		panic(err.Error())
+	}
+	if err := niclasgeigerv1.CreateCRD(apiextcsClient); err != nil {
+		log.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Fatal("Could not add CRD to K8s API")
+		return nil
+	}
+	userInformer := factory.Niclasgeiger().V1().Users()
 
 	controller := &Controller{
-		workqueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Foos"),
-		fooLister: fooInformer.Lister(),
-		k8sClient: kubeClient,
+		workqueue:  workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Users"),
+		userLister: userInformer.Lister(),
+		k8sClient:  kubeClient,
 	}
 
 	// add event listener for CRD
-	factory.Niclasgeiger().V1().Foos().Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	userInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			controller.EnqueueItem(AddAction, obj)
 		},
@@ -203,7 +216,7 @@ func (c *Controller) deleteFoo(job Job) error {
 func (c *Controller) addFoo(job Job) error {
 
 	// Get the Foo resource with this namespace/name
-	foo, err := c.fooLister.Foos(job.Namespace).Get(job.Name)
+	foo, err := c.userLister.Get(job.Name)
 	if err != nil {
 		// The Foo resource may no longer exist, in which case we stop
 		// processing.
