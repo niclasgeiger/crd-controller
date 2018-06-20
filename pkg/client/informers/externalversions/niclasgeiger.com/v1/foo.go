@@ -31,58 +31,58 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// UserInformer provides access to a shared informer and lister for
-// Users.
-type UserInformer interface {
+// FooInformer provides access to a shared informer and lister for
+// Foos.
+type FooInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.UserLister
+	Lister() v1.FooLister
 }
 
-type userInformer struct {
+type fooInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 }
 
-// NewUserInformer constructs a new informer for User type.
+// NewFooInformer constructs a new informer for Foo type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewUserInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredUserInformer(client, resyncPeriod, indexers, nil)
+func NewFooInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredFooInformer(client, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredUserInformer constructs a new informer for User type.
+// NewFilteredFooInformer constructs a new informer for Foo type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredUserInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredFooInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.NiclasgeigerV1().Users().List(options)
+				return client.NiclasgeigerV1().Foos().List(options)
 			},
 			WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.NiclasgeigerV1().Users().Watch(options)
+				return client.NiclasgeigerV1().Foos().Watch(options)
 			},
 		},
-		&niclasgeiger_com_v1.User{},
+		&niclasgeiger_com_v1.Foo{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *userInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredUserInformer(client, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *fooInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredFooInformer(client, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *userInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&niclasgeiger_com_v1.User{}, f.defaultInformer)
+func (f *fooInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&niclasgeiger_com_v1.Foo{}, f.defaultInformer)
 }
 
-func (f *userInformer) Lister() v1.UserLister {
-	return v1.NewUserLister(f.Informer().GetIndexer())
+func (f *fooInformer) Lister() v1.FooLister {
+	return v1.NewFooLister(f.Informer().GetIndexer())
 }

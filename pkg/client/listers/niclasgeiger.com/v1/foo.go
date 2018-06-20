@@ -25,41 +25,41 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// UserLister helps list Users.
-type UserLister interface {
-	// List lists all Users in the indexer.
-	List(selector labels.Selector) (ret []*v1.User, err error)
-	// Get retrieves the User from the index for a given name.
-	Get(name string) (*v1.User, error)
-	UserListerExpansion
+// FooLister helps list Foos.
+type FooLister interface {
+	// List lists all Foos in the indexer.
+	List(selector labels.Selector) (ret []*v1.Foo, err error)
+	// Get retrieves the Foo from the index for a given name.
+	Get(name string) (*v1.Foo, error)
+	FooListerExpansion
 }
 
-// userLister implements the UserLister interface.
-type userLister struct {
+// fooLister implements the FooLister interface.
+type fooLister struct {
 	indexer cache.Indexer
 }
 
-// NewUserLister returns a new UserLister.
-func NewUserLister(indexer cache.Indexer) UserLister {
-	return &userLister{indexer: indexer}
+// NewFooLister returns a new FooLister.
+func NewFooLister(indexer cache.Indexer) FooLister {
+	return &fooLister{indexer: indexer}
 }
 
-// List lists all Users in the indexer.
-func (s *userLister) List(selector labels.Selector) (ret []*v1.User, err error) {
+// List lists all Foos in the indexer.
+func (s *fooLister) List(selector labels.Selector) (ret []*v1.Foo, err error) {
 	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.User))
+		ret = append(ret, m.(*v1.Foo))
 	})
 	return ret, err
 }
 
-// Get retrieves the User from the index for a given name.
-func (s *userLister) Get(name string) (*v1.User, error) {
+// Get retrieves the Foo from the index for a given name.
+func (s *fooLister) Get(name string) (*v1.Foo, error) {
 	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		return nil, errors.NewNotFound(v1.Resource("user"), name)
+		return nil, errors.NewNotFound(v1.Resource("foo"), name)
 	}
-	return obj.(*v1.User), nil
+	return obj.(*v1.Foo), nil
 }

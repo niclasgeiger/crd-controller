@@ -18,6 +18,6 @@ limitations under the License.
 
 package v1
 
-// UserListerExpansion allows custom methods to be added to
-// UserLister.
-type UserListerExpansion interface{}
+// FooListerExpansion allows custom methods to be added to
+// FooLister.
+type FooListerExpansion interface{}
