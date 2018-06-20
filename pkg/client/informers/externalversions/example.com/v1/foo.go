@@ -21,10 +21,10 @@ package v1
 import (
 	time "time"
 
-	niclasgeiger_com_v1 "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com/v1"
+	example_com_v1 "github.com/niclasgeiger/crd-controller/pkg/apis/example.com/v1"
 	versioned "github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.com/niclasgeiger/crd-controller/pkg/client/listers/niclasgeiger.com/v1"
+	v1 "github.com/niclasgeiger/crd-controller/pkg/client/listers/example.com/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -60,16 +60,16 @@ func NewFilteredFooInformer(client versioned.Interface, resyncPeriod time.Durati
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.NiclasgeigerV1().Foos().List(options)
+				return client.ExampleV1().Foos().List(options)
 			},
 			WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.NiclasgeigerV1().Foos().Watch(options)
+				return client.ExampleV1().Foos().Watch(options)
 			},
 		},
-		&niclasgeiger_com_v1.Foo{},
+		&example_com_v1.Foo{},
 		resyncPeriod,
 		indexers,
 	)
@@ -80,7 +80,7 @@ func (f *fooInformer) defaultInformer(client versioned.Interface, resyncPeriod t
 }
 
 func (f *fooInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&niclasgeiger_com_v1.Foo{}, f.defaultInformer)
+	return f.factory.InformerFor(&example_com_v1.Foo{}, f.defaultInformer)
 }
 
 func (f *fooInformer) Lister() v1.FooLister {

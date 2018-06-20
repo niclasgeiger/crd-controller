@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	niclasgeigerv1 "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com/v1"
+	examplev1 "github.com/niclasgeiger/crd-controller/pkg/apis/example.com/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -50,5 +50,5 @@ func init() {
 // After this, RawExtensions in Kubernetes types will serialize kube-aggregator types
 // correctly.
 func AddToScheme(scheme *runtime.Scheme) {
-	niclasgeigerv1.AddToScheme(scheme)
+	examplev1.AddToScheme(scheme)
 }

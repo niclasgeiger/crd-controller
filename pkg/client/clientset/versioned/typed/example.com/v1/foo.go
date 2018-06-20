@@ -19,7 +19,7 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com/v1"
+	v1 "github.com/niclasgeiger/crd-controller/pkg/apis/example.com/v1"
 	scheme "github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned/scheme"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -52,7 +52,7 @@ type foos struct {
 }
 
 // newFoos returns a Foos
-func newFoos(c *NiclasgeigerV1Client) *foos {
+func newFoos(c *ExampleV1Client) *foos {
 	return &foos{
 		client: c.RESTClient(),
 	}

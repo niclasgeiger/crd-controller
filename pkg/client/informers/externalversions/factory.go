@@ -24,8 +24,8 @@ import (
 	time "time"
 
 	versioned "github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned"
+	example_com "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions/example.com"
 	internalinterfaces "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions/internalinterfaces"
-	niclasgeiger_com "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions/niclasgeiger.com"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -172,9 +172,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Niclasgeiger() niclasgeiger_com.Interface
+	Example() example_com.Interface
 }
 
-func (f *sharedInformerFactory) Niclasgeiger() niclasgeiger_com.Interface {
-	return niclasgeiger_com.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Example() example_com.Interface {
+	return example_com.New(f, f.namespace, f.tweakListOptions)
 }

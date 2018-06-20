@@ -19,28 +19,28 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com/v1"
+	v1 "github.com/niclasgeiger/crd-controller/pkg/apis/example.com/v1"
 	"github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
 
-type NiclasgeigerV1Interface interface {
+type ExampleV1Interface interface {
 	RESTClient() rest.Interface
 	FoosGetter
 }
 
-// NiclasgeigerV1Client is used to interact with features provided by the niclasgeiger.com group.
-type NiclasgeigerV1Client struct {
+// ExampleV1Client is used to interact with features provided by the example.com group.
+type ExampleV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *NiclasgeigerV1Client) Foos() FooInterface {
+func (c *ExampleV1Client) Foos() FooInterface {
 	return newFoos(c)
 }
 
-// NewForConfig creates a new NiclasgeigerV1Client for the given config.
-func NewForConfig(c *rest.Config) (*NiclasgeigerV1Client, error) {
+// NewForConfig creates a new ExampleV1Client for the given config.
+func NewForConfig(c *rest.Config) (*ExampleV1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -49,12 +49,12 @@ func NewForConfig(c *rest.Config) (*NiclasgeigerV1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &NiclasgeigerV1Client{client}, nil
+	return &ExampleV1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new NiclasgeigerV1Client for the given config and
+// NewForConfigOrDie creates a new ExampleV1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *NiclasgeigerV1Client {
+func NewForConfigOrDie(c *rest.Config) *ExampleV1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -62,9 +62,9 @@ func NewForConfigOrDie(c *rest.Config) *NiclasgeigerV1Client {
 	return client
 }
 
-// New creates a new NiclasgeigerV1Client for the given RESTClient.
-func New(c rest.Interface) *NiclasgeigerV1Client {
-	return &NiclasgeigerV1Client{c}
+// New creates a new ExampleV1Client for the given RESTClient.
+func New(c rest.Interface) *ExampleV1Client {
+	return &ExampleV1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -82,7 +82,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *NiclasgeigerV1Client) RESTClient() rest.Interface {
+func (c *ExampleV1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

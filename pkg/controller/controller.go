@@ -40,7 +40,7 @@ func NewController(restConfig *rest.Config) (*Controller, error) {
 		return nil, err
 	}
 	crdInformerFactory := informers.NewSharedInformerFactory(crdClient, time.Second*30)
-	crdInformer := crdInformerFactory.Niclasgeiger().V1().Foos().Informer()
+	crdInformer := crdInformerFactory.Example().V1().Foos().Informer()
 
 	controller := &Controller{
 		informer: crdInformer,

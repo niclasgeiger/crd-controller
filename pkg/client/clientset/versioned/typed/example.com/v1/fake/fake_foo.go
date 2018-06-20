@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	niclasgeiger_com_v1 "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com/v1"
+	example_com_v1 "github.com/niclasgeiger/crd-controller/pkg/apis/example.com/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -30,27 +30,27 @@ import (
 
 // FakeFoos implements FooInterface
 type FakeFoos struct {
-	Fake *FakeNiclasgeigerV1
+	Fake *FakeExampleV1
 }
 
-var foosResource = schema.GroupVersionResource{Group: "niclasgeiger.com", Version: "v1", Resource: "foos"}
+var foosResource = schema.GroupVersionResource{Group: "example.com", Version: "v1", Resource: "foos"}
 
-var foosKind = schema.GroupVersionKind{Group: "niclasgeiger.com", Version: "v1", Kind: "Foo"}
+var foosKind = schema.GroupVersionKind{Group: "example.com", Version: "v1", Kind: "Foo"}
 
 // Get takes name of the foo, and returns the corresponding foo object, and an error if there is any.
-func (c *FakeFoos) Get(name string, options v1.GetOptions) (result *niclasgeiger_com_v1.Foo, err error) {
+func (c *FakeFoos) Get(name string, options v1.GetOptions) (result *example_com_v1.Foo, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootGetAction(foosResource, name), &niclasgeiger_com_v1.Foo{})
+		Invokes(testing.NewRootGetAction(foosResource, name), &example_com_v1.Foo{})
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*niclasgeiger_com_v1.Foo), err
+	return obj.(*example_com_v1.Foo), err
 }
 
 // List takes label and field selectors, and returns the list of Foos that match those selectors.
-func (c *FakeFoos) List(opts v1.ListOptions) (result *niclasgeiger_com_v1.FooList, err error) {
+func (c *FakeFoos) List(opts v1.ListOptions) (result *example_com_v1.FooList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootListAction(foosResource, foosKind, opts), &niclasgeiger_com_v1.FooList{})
+		Invokes(testing.NewRootListAction(foosResource, foosKind, opts), &example_com_v1.FooList{})
 	if obj == nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (c *FakeFoos) List(opts v1.ListOptions) (result *niclasgeiger_com_v1.FooLis
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &niclasgeiger_com_v1.FooList{}
-	for _, item := range obj.(*niclasgeiger_com_v1.FooList).Items {
+	list := &example_com_v1.FooList{}
+	for _, item := range obj.(*example_com_v1.FooList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -75,29 +75,29 @@ func (c *FakeFoos) Watch(opts v1.ListOptions) (watch.Interface, error) {
 }
 
 // Create takes the representation of a foo and creates it.  Returns the server's representation of the foo, and an error, if there is any.
-func (c *FakeFoos) Create(foo *niclasgeiger_com_v1.Foo) (result *niclasgeiger_com_v1.Foo, err error) {
+func (c *FakeFoos) Create(foo *example_com_v1.Foo) (result *example_com_v1.Foo, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(foosResource, foo), &niclasgeiger_com_v1.Foo{})
+		Invokes(testing.NewRootCreateAction(foosResource, foo), &example_com_v1.Foo{})
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*niclasgeiger_com_v1.Foo), err
+	return obj.(*example_com_v1.Foo), err
 }
 
 // Update takes the representation of a foo and updates it. Returns the server's representation of the foo, and an error, if there is any.
-func (c *FakeFoos) Update(foo *niclasgeiger_com_v1.Foo) (result *niclasgeiger_com_v1.Foo, err error) {
+func (c *FakeFoos) Update(foo *example_com_v1.Foo) (result *example_com_v1.Foo, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateAction(foosResource, foo), &niclasgeiger_com_v1.Foo{})
+		Invokes(testing.NewRootUpdateAction(foosResource, foo), &example_com_v1.Foo{})
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*niclasgeiger_com_v1.Foo), err
+	return obj.(*example_com_v1.Foo), err
 }
 
 // Delete takes name of the foo and deletes it. Returns an error if one occurs.
 func (c *FakeFoos) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewRootDeleteAction(foosResource, name), &niclasgeiger_com_v1.Foo{})
+		Invokes(testing.NewRootDeleteAction(foosResource, name), &example_com_v1.Foo{})
 	return err
 }
 
@@ -105,16 +105,16 @@ func (c *FakeFoos) Delete(name string, options *v1.DeleteOptions) error {
 func (c *FakeFoos) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	action := testing.NewRootDeleteCollectionAction(foosResource, listOptions)
 
-	_, err := c.Fake.Invokes(action, &niclasgeiger_com_v1.FooList{})
+	_, err := c.Fake.Invokes(action, &example_com_v1.FooList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched foo.
-func (c *FakeFoos) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *niclasgeiger_com_v1.Foo, err error) {
+func (c *FakeFoos) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *example_com_v1.Foo, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(foosResource, name, data, subresources...), &niclasgeiger_com_v1.Foo{})
+		Invokes(testing.NewRootPatchSubresourceAction(foosResource, name, data, subresources...), &example_com_v1.Foo{})
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*niclasgeiger_com_v1.Foo), err
+	return obj.(*example_com_v1.Foo), err
 }

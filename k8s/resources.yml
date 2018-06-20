@@ -46,7 +46,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name:  system:default:crd-controller-roles
 rules:
-- apiGroups: ["", "niclasgeiger.com"]
+- apiGroups: ["", "example.com"]
   resources: ["*"]
   verbs: ["*"]
 ---
