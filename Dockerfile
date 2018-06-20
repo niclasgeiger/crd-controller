@@ -1,7 +1,7 @@
 FROM golang:1.10
 
-ADD . /go/src/github.com/niclasgeiger/crd-controller
+MAINTAINER Niclas Geiger
 
-WORKDIR /go/src/github.com/niclasgeiger/crd-controller
+ADD main /
 
-ENTRYPOINT ["go", "run", "main.go"]
+ENTRYPOINT ["/main"]

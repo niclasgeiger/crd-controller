@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,4 +30,8 @@ type FooList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []Foo `json:"items"`
+}
+
+func (in Foo) String() string {
+	return fmt.Sprintf("----Foo Object----\nname:%s\nnamespace:%s\nfoo data:%s\n\n", in.Name, in.Namespace, in.Spec.SomeData)
 }

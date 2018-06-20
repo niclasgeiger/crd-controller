@@ -1,0 +1,6 @@
+apiVersion: "example.com/v1"
+kind: Foo
+metadata:
+  name: test-1
+spec:
+  foo_data: "Hello World"

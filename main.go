@@ -20,7 +20,7 @@ func main() {
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
 
-	cfg, err := LocalConfig()
+	cfg, err := KubeConfig()
 	if err != nil {
 		logrus.Fatalf("Error getting kubeconfig: %s", err.Error())
 	}
@@ -35,8 +35,11 @@ func main() {
 	}
 }
 
-func LocalConfig() (*rest.Config, error) {
+func KubeConfig() (*rest.Config, error) {
 	var kubeconfig *string
+	if kubeconfig, err := rest.InClusterConfig(); err == nil {
+		return kubeconfig, nil
+	}
 
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")

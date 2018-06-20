@@ -7,7 +7,6 @@ import (
 
 	"github.com/niclasgeiger/crd-controller/pkg/client/clientset/versioned"
 	informers "github.com/niclasgeiger/crd-controller/pkg/client/informers/externalversions"
-	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -22,16 +21,21 @@ type ResourceEventHandler struct {
 }
 
 func (r ResourceEventHandler) OnAdd(obj interface{}) {
-	log.Info(obj)
+	fmt.Println("On Add")
+	fmt.Println(obj)
 }
 
 func (r ResourceEventHandler) OnUpdate(oldObj, newObj interface{}) {
-	log.Info(oldObj)
-	log.Info(newObj)
+	fmt.Println("On Update")
+	fmt.Println("old:")
+	fmt.Println(oldObj)
+	fmt.Println("new:")
+	fmt.Println(newObj)
 }
 
 func (r ResourceEventHandler) OnDelete(obj interface{}) {
-	log.Info(obj)
+	fmt.Println("On Delete")
+	fmt.Println(obj)
 }
 
 func NewController(restConfig *rest.Config) (*Controller, error) {
