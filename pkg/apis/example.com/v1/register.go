@@ -5,11 +5,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	niclasgeigercom "github.com/niclasgeiger/crd-controller/pkg/apis/niclasgeiger.com"
+	"github.com/niclasgeiger/crd-controller/pkg/apis/example.com"
 )
 
 // SchemeGroupVersion is group version used to register these objects
-var SchemeGroupVersion = schema.GroupVersion{Group: niclasgeigercom.GroupName, Version: "v1"}
+var SchemeGroupVersion = schema.GroupVersion{Group: example_com.GroupName, Version: "v1"}
 
 // Resource takes an unqualified resource and returns a Group qualified GroupResource
 func Resource(resource string) schema.GroupResource {
